@@ -118,7 +118,7 @@ class Dune:
             offset += limit
             time.sleep(1) # Let's be gentle. Dune is growing
     
-    def list_columns(self):
+    def list_columns(self, schema, table, dataset_id=4, limit=50):
         gql_query = gql('''
             query ListColumns($dataset_id: Int!, $schema: String!, $table: String!, $limit: Int!) {
                 blockchain_schemas(
