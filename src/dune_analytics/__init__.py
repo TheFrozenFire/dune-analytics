@@ -98,7 +98,6 @@ class Dune:
                 "full_name": {
                   "_ilike": '%' + name_filter + '%'
                 }
-              }
             })
 
         while True:
