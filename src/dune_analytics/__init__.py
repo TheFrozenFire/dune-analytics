@@ -70,7 +70,7 @@ class Dune:
 
         return self.find_result_data_by_job(job_id)
         
-    def list_tables(self, dataset_id=4, limit=50, name_filter=None):
+    def list_tables(self, name_filter=None, dataset_id=4, limit=50):
         gql_query = gql('''
             query ListSchemas($dataset_id: Int!, $query: [blockchain_schemas_bool_exp], $offset: Int!, $limit: Int!) {
                 blockchain_schemas(
