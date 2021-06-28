@@ -9,6 +9,8 @@ into memory. This can be used to, for instance, pull data from DA into a Pandas 
 [![pyversion][pyversion-image]][pyversion-url]
 [![pypi][pypi-image]][pypi-url]
 
+Tip me at [0xD660994dfD06A7d33C779E77bBd7D71b3C9C6AeA](https://etherscan.io/address/0xD660994dfD06A7d33C779E77bBd7D71b3C9C6AeA)
+
 ## Installation
 
     $ pip install --pre dune_analytics
