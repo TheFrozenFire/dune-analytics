@@ -140,7 +140,7 @@ class Dune:
         })
         
         for column in result['blockchain_schemas']:
-            yield { "name": columns['column_name'], "data_type": column['data_type']
+            yield { "name": columns['column_name'], "data_type": column['data_type'] }
 
     def upsert_query(self, query, dataset_id=4):
         gql_query = gql("""
