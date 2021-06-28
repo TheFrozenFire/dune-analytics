@@ -69,8 +69,81 @@ class Dune:
         self.wait_for_job(job_id)
 
         return self.find_result_data_by_job(job_id)
+        
+    def list_tables(self, dataset_id=4, limit=50, name_filter=None):
+        gql_query = gql('''
+            query ListSchemas($dataset_id: Int!, $query: [blockchain_schemas_bool_exp], $offset: Int!, $limit: Int!) {
+                blockchain_schemas(
+                    where: {dataset_id: {_eq: $dataset_id}, _and: $query}
+                    order_by: [{schema: asc}, {table: asc}]
+                    distinct_on: [schema, table]
+                    offset: $offset
+                    limit: $limit
+                ) {
+                    schema
+                    table
+                    __typename
+                }
+            }
+        ''')
+        
+        query = []
+        offset = 0
+        
+        if limit > 10000:
+            raise Exception("Please don't abuse Dune's free service")
+        
+        if name_filter is not None:
+            query.append({
+                "full_name": {
+                  "_ilike": '%' + name_filter + '%'
+                }
+              }
+            })
 
-    def upsert_query(self, query):
+        while True:
+            result = self.client.execute(gql_query, variable_values={
+                "dataset_id": dataset_id,
+                "limit": limit,
+                "query": query,
+                "offset": offset
+            })
+            
+            if len(result['blockchain_schemas']) == 0:
+                break
+
+            for table in result['blockchain_schemas']:
+                yield {"schema": table['schema'], "table": table['table']}
+            
+            offset += limit
+            time.sleep(1) # Let's be gentle. Dune is growing
+    
+    def list_columns(self):
+        gql_query = gql('''
+            query ListColumns($dataset_id: Int!, $schema: String!, $table: String!, $limit: Int!) {
+                blockchain_schemas(
+                    where: {dataset_id: {_eq: $dataset_id}, schema: {_eq: $schema}, table: {_eq: $table}}
+                    order_by: {column_name: asc}
+                    limit: $limit
+                ) {
+                    column_name
+                    data_type
+                    __typename
+                }
+            }
+        ''')
+       
+        result = self.client.execute(gql_query, variable_values={
+            "schema": schema,
+            "table": table,
+            "dataset_id": dataset_id,
+            "limit": limit
+        })
+        
+        for column in result['blockchain_schemas']:
+            yield { "name": columns['column_name'], "data_type": column['data_type']
+
+    def upsert_query(self, query, dataset_id=4):
         gql_query = gql("""
             mutation UpsertQuery($session_id: Int!, $object: queries_insert_input!, $on_conflict: queries_on_conflict!, $favs_last_24h: Boolean! = false, $favs_last_7d: Boolean! = false, $favs_last_30d: Boolean! = false, $favs_all_time: Boolean! = true) {
                 insert_queries_one(object: $object, on_conflict: $on_conflict) {
@@ -147,8 +220,8 @@ class Dune:
             "favs_all_time": False,
             "object": {
             "schedule": None,
-            "dataset_id": 4,
-            "name": "Jupyter Test",
+            "dataset_id": dataset_id,
+            "name": "Jupyter Temporary Query",
             "query": query,
             "user_id": self.user['id'],
             "description": "",
