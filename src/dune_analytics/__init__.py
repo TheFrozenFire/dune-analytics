@@ -6,7 +6,7 @@ class Dune:
     def __init__(self, username=None, password=None, transport=None):
         
         if transport is None:
-            transport = RequestsHTTPTransport(url="https://core-hsr.duneanalytics.com/v1/graphql")
+            transport = RequestsHTTPTransport(url="https://core-hsr.dune.xyz/v1/graphql")
 
         self.client = Client(transport=transport, fetch_schema_from_transport=True)
 
@@ -16,21 +16,21 @@ class Dune:
     def authenticate(self, username, password):
         transport = self.client.transport
 
-        csrf = transport.session.post("https://duneanalytics.com/api/auth/csrf").json()['csrf']
-        r_auth = transport.session.post("https://duneanalytics.com/api/auth", data={
+        csrf = transport.session.post("https://dune.xyz/api/auth/csrf").json()['csrf']
+        r_auth = transport.session.post("https://dune.xyz/api/auth", data={
             "csrf": csrf,
             "action": "login",
             "username": username,
             "password": password
         }, headers={
-            "Origin": "https://duneanalytics.com",
-            "Referer": "https://duneanalytics.com/auth/login"
+            "Origin": "https://dune.xyz",
+            "Referer": "https://dune.xyz/auth/login"
         }, allow_redirects=False)
 
         self.refresh_session()
     
     def refresh_session(self):
-        r_session = self.client.transport.session.post("https://duneanalytics.com/api/auth/session")
+        r_session = self.client.transport.session.post("https://dune.xyz/api/auth/session")
         dune_session = r_session.json()
 
         if 'token' in dune_session:
